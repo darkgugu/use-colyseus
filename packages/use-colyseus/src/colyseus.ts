@@ -15,6 +15,55 @@ export const colyseus = <S = Schema>(
 
   let connecting = false;
 
+  const setupRoom = (room: Room<S>) => {
+    roomStore.set(room);
+    stateStore.set(room.state);
+
+    const updatedCollectionsMap: { [key in keyof S]?: boolean } = {};
+
+    for (const [key, value] of Object.entries(room.state as Schema)) {
+      if (
+        typeof value !== "object" ||
+        !value.clone ||
+        !value.onAdd ||
+        !value.onRemove
+      ) {
+        continue;
+      }
+
+      updatedCollectionsMap[key as keyof S] = false;
+
+      value.onAdd(() => {
+        updatedCollectionsMap[key as keyof S] = true;
+      });
+
+      value.onRemove(() => {
+        updatedCollectionsMap[key as keyof S] = true;
+      });
+    }
+
+    room.onStateChange((state) => {
+      if (!state) return;
+
+      const copy = { ...state };
+
+      for (const [key, update] of Object.entries(updatedCollectionsMap)) {
+        if (!update) continue;
+
+        updatedCollectionsMap[key as keyof S] = false;
+
+        const value = state[key as keyof S] as unknown;
+
+        if ((value as Schema).clone) {
+          //@ts-ignore
+          copy[key as keyof S] = value.clone();
+        }
+      }
+
+      stateStore.set(copy);
+    });
+  };
+
   const connectToColyseus = async (roomName: string, options = {}) => {
     if (connecting || roomStore.get()) return;
 
@@ -22,59 +71,31 @@ export const colyseus = <S = Schema>(
 
     try {
       const room = await client.joinOrCreate<S>(roomName, options, schema);
-
-      roomStore.set(room);
-      stateStore.set(room.state);
-
-      const updatedCollectionsMap: { [key in keyof S]?: boolean } = {};
-
-      for (const [key, value] of Object.entries(room.state as Schema)) {
-        if (
-          typeof value !== "object" ||
-          !value.clone ||
-          !value.onAdd ||
-          !value.onRemove
-        ) {
-          continue;
-        }
-
-        updatedCollectionsMap[key as keyof S] = false;
-
-        value.onAdd(() => {
-          updatedCollectionsMap[key as keyof S] = true;
-        });
-
-        value.onRemove(() => {
-          updatedCollectionsMap[key as keyof S] = true;
-        });
-      }
-
-      room.onStateChange((state) => {
-        if (!state) return;
-
-        const copy = { ...state };
-
-        for (const [key, update] of Object.entries(updatedCollectionsMap)) {
-          if (!update) continue;
-
-          updatedCollectionsMap[key as keyof S] = false;
-
-          const value = state[key as keyof S] as unknown;
-
-          if ((value as Schema).clone) {
-            //@ts-ignore
-            copy[key as keyof S] = value.clone();
-          }
-        }
-
-        stateStore.set(copy);
-      });
+      setupRoom(room);
 
       console.log(
-        `Succesfully connected to Colyseus room ${roomName} at ${endpoint}`
+        `Successfully connected to Colyseus room ${roomName} at ${endpoint}`
       );
     } catch (e) {
       console.error("Failed to connect to Colyseus!");
+      console.log(e);
+    } finally {
+      connecting = false;
+    }
+  };
+
+  const joinColyseusRoomById = async (roomId: string) => {
+    if (connecting || roomStore.get()) return;
+
+    connecting = true;
+
+    try {
+      const room = await client.joinById<S>(roomId);
+      setupRoom(room);
+
+      console.log(`Successfully joined Colyseus room by ID: ${roomId}`);
+    } catch (e) {
+      console.error(`Failed to join Colyseus room with ID: ${roomId}`);
       console.log(e);
     } finally {
       connecting = false;
@@ -127,6 +148,7 @@ export const colyseus = <S = Schema>(
   return {
     client,
     connectToColyseus,
+    joinColyseusRoomById,
     disconnectFromColyseus,
     useColyseusRoom,
     useColyseusState,
