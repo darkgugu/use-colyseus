@@ -74,33 +74,54 @@ export const colyseus = <S = Schema>(
       setupRoom(room);
 
       console.log(
-        `Successfully connected to Colyseus room ${roomName} at ${endpoint}`
+        `[use-colyseus] Successfully connected to Colyseus room ${roomName} at ${endpoint}`
       );
     } catch (e) {
-      console.error("Failed to connect to Colyseus!");
+      console.error("[use-colyseus] Failed to connect to Colyseus!");
       console.log(e);
     } finally {
       connecting = false;
     }
   };
 
-  const joinColyseusRoomById = async (roomId: string) => {
+  const joinColyseusRoomById = async (roomId: string, options = {}) => {
     if (connecting || roomStore.get()) return;
 
     connecting = true;
 
+    console.log(`[use-colyseus] Joining Colyseus room by ID: ${roomId} with options:`, options);
+
     try {
-      const room = await client.joinById<S>(roomId);
+      const room = await client.joinById<S>(roomId, options);
       setupRoom(room);
 
-      console.log(`Successfully joined Colyseus room by ID: ${roomId}`);
+      console.log(`[use-colyseus] Successfully joined Colyseus room by ID: ${roomId}`);
     } catch (e) {
-      console.error(`Failed to join Colyseus room with ID: ${roomId}`);
+      console.error(`[use-colyseus] Failed to join Colyseus room with ID: ${roomId}`);
       console.log(e);
     } finally {
       connecting = false;
     }
   };
+
+  const createColyseusRoom = async (roomName: string, options = {}) => {
+  if (connecting || roomStore.get()) return;
+
+  connecting = true;
+
+  try {
+    const room = await client.create<S>(roomName, options, schema);
+    setupRoom(room);
+
+    console.log(`Successfully created and joined Colyseus room ${roomName}`);
+  } catch (e) {
+    console.error(`Failed to create Colyseus room ${roomName}`);
+    console.log(e);
+  } finally {
+    connecting = false;
+  }
+};
+
 
   const disconnectFromColyseus = async () => {
     const room = roomStore.get();
@@ -111,7 +132,7 @@ export const colyseus = <S = Schema>(
 
     try {
       await room.leave();
-      console.log("Disconnected from Colyseus!");
+      console.log("[use-colyseus] Disconnected from Colyseus!");
     } catch {}
   };
 
@@ -152,5 +173,6 @@ export const colyseus = <S = Schema>(
     disconnectFromColyseus,
     useColyseusRoom,
     useColyseusState,
+    createColyseusRoom,
   };
 };
