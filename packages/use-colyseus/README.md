@@ -22,6 +22,8 @@ This package still needs to be battle-tested for production, but it gives a good
     export const {
       client,
       connectToColyseus,
+      joinColyseusRoomById,
+      createColyseusRoom,
       disconnectFromColyseus,
       useColyseusRoom,
       useColyseusState,
@@ -42,6 +44,8 @@ This package still needs to be battle-tested for production, but it gives a good
   #### Return:
   - `Client`
   - `connectToColyseus`
+  - `joinColyseusRoom`
+  - `createColyseusRoom`
   - `disconnectFromColyseus`
   - `useColyseusRoom`
   - `useColyseusState`
@@ -51,6 +55,8 @@ This package still needs to be battle-tested for production, but it gives a good
   export const {
       client,
       connectToColyseus,
+      joinColyseusRoom,
+      createColyseusRoom,
       disconnectFromColyseus,
       useColyseusRoom,
       useColyseusState,
@@ -140,8 +146,7 @@ This package still needs to be battle-tested for production, but it gives a good
   ```
 
 ## Acknowledgements
-- [Endel Dreyer](https://github.com/endel): Creating such a powerful and easy to use network framework.
-- [Douglas Delavy](https://github.com/OddoAkbar): Partnership during the development of this package.
+- [Pedro Fontoura](https://github.com/pedr0fontoura) : Original maker of this project, go see his version for all Acknowledgements
 
 ----
-[Get in touch 👋](https://twitter.com/pedr0fontoura)
+

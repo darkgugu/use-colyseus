@@ -1,7 +1,7 @@
 {
-  "name": "use-colyseus",
-  "version": "0.0.7",
-  "description": "Set of utility React hooks to use Colyseus with React.",
+  "name": "@darkgugu/use-colyseus",
+  "version": "0.1.0",
+  "description": "A customized fork of use-colyseus with extended support for creating and joining Colyseus rooms.",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
@@ -11,9 +11,9 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "publish-package": "pnpm run build && pnpm publish"
+    "publish-package": "npm run build && npm publish"
   },
-  "author": "Pedro Fontoura",
+  "author": "Icham Duret",
   "keywords": [
     "colyseus",
     "multiplayer",
@@ -26,8 +26,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/pedr0fontoura/use-colyseus.git"
+    "url": "https://github.com/darkgugu/use-colyseus.git"
   },
+  
   "dependencies": {
     "@colyseus/schema": "^2.0.20",
     "colyseus.js": "^0.15.14",
